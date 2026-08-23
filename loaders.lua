@@ -13,8 +13,8 @@ return {
     {
         Title = "HX Boat",
 
-        DescriptionES = "Hola.",
-        DescriptionEN = "hola2.",
+        DescriptionES = "Script optimizado para Build A Boat con Auto Farm, teleports, mejoras de barco y utilidades.",
+        DescriptionEN = "Optimized script for Build A Boat featuring Auto Farm, teleports, boat upgrades, and utilities.",
 
         Image = "rbxassetid://114285884839092",
         URL = "https://raw.githubusercontent.com/NonyH/universalh3xa/refs/heads/main/hboat.lua",
