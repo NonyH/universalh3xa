@@ -7,7 +7,9 @@ local CATALOG_URL = "https://raw.githubusercontent.com/NonyH/universalh3xa/refs/
 
 local function new(class, props)
     local o = Instance.new(class)
-    for k,v in pairs(props or {}) do o[k] = v end
+    for k, v in pairs(props or {}) do
+        o[k] = v
+    end
     return o
 end
 
@@ -15,24 +17,51 @@ local function round(obj, px)
     local c = Instance.new("UICorner")
     c.CornerRadius = UDim.new(0, px or 12)
     c.Parent = obj
+    return c
 end
 
-local function stroke(obj, t)
+local function stroke(obj, transparency)
     local s = Instance.new("UIStroke")
-    s.Color = Color3.new(1,1,1)
-    s.Transparency = t or .9
+    s.Color = Color3.new(1, 1, 1)
+    s.Transparency = transparency or 0.9
     s.Thickness = 1
     s.Parent = obj
+    return s
+end
+
+local function clampDescription(text)
+    text = tostring(text or "")
+    if #text <= 100 then
+        return text
+    end
+    return string.sub(text, 1, 97) .. "..."
+end
+
+local function fallbackDescription(data)
+    local title = tostring(data.Title or "Script")
+    local lower = string.lower(title)
+
+    if string.find(lower, "boat", 1, true) then
+        return "Script diseñado para Build A Boat For Treasure."
+    elseif string.find(lower, "h3x4", 1, true) then
+        return "Script universal con herramientas y funciones para múltiples juegos."
+    end
+
+    return "Script disponible en el cargador universal H3X4."
 end
 
 local parent = Player:WaitForChild("PlayerGui")
 if typeof(gethui) == "function" then
     local ok, p = pcall(gethui)
-    if ok and p then parent = p end
+    if ok and p then
+        parent = p
+    end
 end
 
 local old = parent:FindFirstChild("H3X4UniversalLoader")
-if old then old:Destroy() end
+if old then
+    old:Destroy()
+end
 
 local gui = new("ScreenGui", {
     Name = "H3X4UniversalLoader",
@@ -40,360 +69,553 @@ local gui = new("ScreenGui", {
     ResetOnSpawn = false,
     DisplayOrder = 999999,
     ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-    Parent = parent
+    Parent = parent,
 })
 
 local overlay = new("Frame", {
-    Size = UDim2.fromScale(1,1),
-    BackgroundColor3 = Color3.new(0,0,0),
+    Size = UDim2.fromScale(1, 1),
+    BackgroundColor3 = Color3.new(0, 0, 0),
     BackgroundTransparency = 1,
     BorderSizePixel = 0,
-    Parent = gui
+    ZIndex = 1,
+    Parent = gui,
 })
 
 local main = new("Frame", {
-    AnchorPoint = Vector2.new(.5,.5),
-    Position = UDim2.fromScale(.5,.5),
-    Size = UDim2.fromOffset(540,360),
-    BackgroundColor3 = Color3.fromRGB(8,8,8),
-    BackgroundTransparency = 1,
+    AnchorPoint = Vector2.new(0.5, 0.5),
+    Position = UDim2.fromScale(0.5, 0.5),
+    Size = UDim2.fromOffset(600, 530),
+    BackgroundColor3 = Color3.new(0, 0, 0),
+    BackgroundTransparency = 0,
     BorderSizePixel = 0,
     ClipsDescendants = true,
-    Parent = gui
+    ZIndex = 2,
+    Parent = gui,
 })
-round(main, 22)
-stroke(main, .82)
+round(main, 24)
+stroke(main, 0.82)
 
-local scale = new("UIScale", {Scale=.84, Parent=main})
+local scale = new("UIScale", {
+    Scale = 0.86,
+    Parent = main,
+})
 
-local bg = new("Frame", {
-    Size = UDim2.fromScale(1,1),
-    BackgroundColor3 = Color3.new(0,0,0),
+-- Fondo galaxia: negro puro + muchas estrellas blancas con movimiento lento y aleatorio.
+local galaxy = new("Frame", {
+    Size = UDim2.fromScale(1, 1),
+    BackgroundColor3 = Color3.new(0, 0, 0),
     BorderSizePixel = 0,
-    Parent = main
+    ClipsDescendants = true,
+    ZIndex = 2,
+    Parent = main,
 })
 
-local grad = new("UIGradient", {
-    Rotation = -25,
-    Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)),
-        ColorSequenceKeypoint.new(.3, Color3.fromRGB(20,20,20)),
-        ColorSequenceKeypoint.new(.5, Color3.fromRGB(58,58,58)),
-        ColorSequenceKeypoint.new(.7, Color3.fromRGB(16,16,16)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,0)),
-    }),
-    Parent = bg
-})
-grad.Offset = Vector2.new(-1,0)
+local function animateStar(star)
+    if not star or not star.Parent or not gui.Parent then
+        return
+    end
 
-TweenService:Create(grad, TweenInfo.new(6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-    Offset = Vector2.new(1,0)
-}):Play()
+    local target = UDim2.fromScale(
+        math.random(0, 1000) / 1000,
+        math.random(0, 1000) / 1000
+    )
+    local duration = math.random(85, 170) / 10
 
-for i=1,6 do
-    local orb = new("Frame", {
-        Size = UDim2.fromOffset(math.random(90,180), math.random(90,180)),
-        Position = UDim2.fromScale(math.random(), math.random()),
-        BackgroundColor3 = Color3.new(1,1,1),
-        BackgroundTransparency = .93,
-        BorderSizePixel = 0,
-        Parent = bg
-    })
-    round(orb, 999)
-    TweenService:Create(orb, TweenInfo.new(math.random(7,12), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-        Position = UDim2.fromScale(math.random(), math.random())
-    }):Play()
+    local tween = TweenService:Create(
+        star,
+        TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+        {Position = target}
+    )
+
+    tween.Completed:Connect(function()
+        if star and star.Parent and gui.Parent then
+            animateStar(star)
+        end
+    end)
+
+    tween:Play()
 end
 
-TweenService:Create(overlay, TweenInfo.new(.25), {BackgroundTransparency=.38}):Play()
-TweenService:Create(main, TweenInfo.new(.25), {BackgroundTransparency=0}):Play()
-TweenService:Create(scale, TweenInfo.new(.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale=1}):Play()
+for i = 1, 105 do
+    local size = math.random(1, 3)
+    local star = new("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(math.random(), math.random()),
+        Size = UDim2.fromOffset(size, size),
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = math.random(8, 48) / 100,
+        BorderSizePixel = 0,
+        ZIndex = 3,
+        Parent = galaxy,
+    })
+    round(star, 999)
+    animateStar(star)
+end
+
+-- Algunas estrellas ligeramente más grandes para dar profundidad sin cambiar el fondo negro.
+for i = 1, 12 do
+    local star = new("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(math.random(), math.random()),
+        Size = UDim2.fromOffset(4, 4),
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = 0.62,
+        BorderSizePixel = 0,
+        ZIndex = 3,
+        Parent = galaxy,
+    })
+    round(star, 999)
+    animateStar(star)
+end
 
 local content = new("Frame", {
-    Size = UDim2.fromScale(1,1),
+    Size = UDim2.fromScale(1, 1),
     BackgroundTransparency = 1,
-    Parent = main
+    ZIndex = 5,
+    Parent = main,
 })
 new("UIPadding", {
-    PaddingTop=UDim.new(0,16), PaddingBottom=UDim.new(0,14),
-    PaddingLeft=UDim.new(0,16), PaddingRight=UDim.new(0,16),
-    Parent=content
+    PaddingTop = UDim.new(0, 16),
+    PaddingBottom = UDim.new(0, 14),
+    PaddingLeft = UDim.new(0, 16),
+    PaddingRight = UDim.new(0, 16),
+    Parent = content,
 })
+
+TweenService:Create(overlay, TweenInfo.new(0.25), {BackgroundTransparency = 0.36}):Play()
+TweenService:Create(scale, TweenInfo.new(0.42, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 
 local header = new("Frame", {
-    Size=UDim2.new(1,0,0,46),
-    BackgroundTransparency=1,
-    Parent=content
+    Size = UDim2.new(1, 0, 0, 46),
+    BackgroundTransparency = 1,
+    ZIndex = 6,
+    Parent = content,
 })
 
 new("TextLabel", {
-    Size=UDim2.new(1,-60,0,26),
-    BackgroundTransparency=1,
-    Text="H3X4",
-    TextColor3=Color3.new(1,1,1),
-    TextSize=21,
-    Font=Enum.Font.GothamBold,
-    TextXAlignment=Enum.TextXAlignment.Left,
-    Parent=header
+    Size = UDim2.new(1, -170, 0, 26),
+    BackgroundTransparency = 1,
+    Text = "H3X4",
+    TextColor3 = Color3.new(1, 1, 1),
+    TextSize = 21,
+    Font = Enum.Font.GothamBold,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 7,
+    Parent = header,
 })
 
 new("TextLabel", {
-    Position=UDim2.fromOffset(0,25),
-    Size=UDim2.new(1,-60,0,16),
-    BackgroundTransparency=1,
-    Text="Universal Loader",
-    TextColor3=Color3.fromRGB(130,130,130),
-    TextSize=10,
-    Font=Enum.Font.GothamMedium,
-    TextXAlignment=Enum.TextXAlignment.Left,
-    Parent=header
+    Position = UDim2.fromOffset(0, 25),
+    Size = UDim2.new(1, -170, 0, 16),
+    BackgroundTransparency = 1,
+    Text = "Universal Loader",
+    TextColor3 = Color3.fromRGB(145, 145, 145),
+    TextSize = 10,
+    Font = Enum.Font.GothamMedium,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 7,
+    Parent = header,
 })
+
+local countBadge = new("TextLabel", {
+    AnchorPoint = Vector2.new(1, 0),
+    Position = UDim2.new(1, -44, 0, 3),
+    Size = UDim2.fromOffset(104, 29),
+    BackgroundColor3 = Color3.new(1, 1, 1),
+    BackgroundTransparency = 0.9,
+    BorderSizePixel = 0,
+    Text = "0 SCRIPTS",
+    TextColor3 = Color3.new(1, 1, 1),
+    TextSize = 9,
+    Font = Enum.Font.GothamBold,
+    ZIndex = 7,
+    Parent = header,
+})
+round(countBadge, 10)
+stroke(countBadge, 0.86)
 
 local close = new("TextButton", {
-    AnchorPoint=Vector2.new(1,0),
-    Position=UDim2.new(1,0,0,0),
-    Size=UDim2.fromOffset(34,34),
-    BackgroundColor3=Color3.new(1,1,1),
-    BackgroundTransparency=.94,
-    BorderSizePixel=0,
-    Text="×",
-    TextColor3=Color3.new(1,1,1),
-    TextSize=21,
-    Font=Enum.Font.GothamMedium,
-    AutoButtonColor=false,
-    Parent=header
+    AnchorPoint = Vector2.new(1, 0),
+    Position = UDim2.new(1, 0, 0, 0),
+    Size = UDim2.fromOffset(34, 34),
+    BackgroundColor3 = Color3.new(1, 1, 1),
+    BackgroundTransparency = 0.92,
+    BorderSizePixel = 0,
+    Text = "×",
+    TextColor3 = Color3.new(1, 1, 1),
+    TextSize = 21,
+    Font = Enum.Font.GothamMedium,
+    AutoButtonColor = false,
+    ZIndex = 7,
+    Parent = header,
 })
 round(close, 11)
 
+local closing = false
+local function closeLoader(callback)
+    if closing then
+        return
+    end
+    closing = true
+
+    TweenService:Create(scale, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.88}):Play()
+    TweenService:Create(main, TweenInfo.new(0.18), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(overlay, TweenInfo.new(0.18), {BackgroundTransparency = 1}):Play()
+
+    task.delay(0.19, function()
+        if gui and gui.Parent then
+            gui:Destroy()
+        end
+        if callback then
+            callback()
+        end
+    end)
+end
+
 close.MouseButton1Click:Connect(function()
-    TweenService:Create(scale, TweenInfo.new(.2), {Scale=.84}):Play()
-    TweenService:Create(overlay, TweenInfo.new(.2), {BackgroundTransparency=1}):Play()
-    task.wait(.2)
-    gui:Destroy()
+    closeLoader()
 end)
 
 local searchFrame = new("Frame", {
-    Position=UDim2.fromOffset(0,54),
-    Size=UDim2.new(1,0,0,42),
-    BackgroundColor3=Color3.new(1,1,1),
-    BackgroundTransparency=.95,
-    BorderSizePixel=0,
-    Parent=content
+    Position = UDim2.fromOffset(0, 54),
+    Size = UDim2.new(1, 0, 0, 42),
+    BackgroundColor3 = Color3.fromRGB(10, 10, 10),
+    BackgroundTransparency = 0.18,
+    BorderSizePixel = 0,
+    ZIndex = 6,
+    Parent = content,
 })
 round(searchFrame, 14)
-stroke(searchFrame, .9)
+stroke(searchFrame, 0.86)
 
 local search = new("TextBox", {
-    Position=UDim2.fromOffset(14,0),
-    Size=UDim2.new(1,-28,1,0),
-    BackgroundTransparency=1,
-    PlaceholderText="Buscar script...",
-    PlaceholderColor3=Color3.fromRGB(115,115,115),
-    Text="",
-    TextColor3=Color3.new(1,1,1),
-    TextSize=13,
-    Font=Enum.Font.GothamMedium,
-    TextXAlignment=Enum.TextXAlignment.Left,
-    ClearTextOnFocus=false,
-    Parent=searchFrame
+    Position = UDim2.fromOffset(14, 0),
+    Size = UDim2.new(1, -28, 1, 0),
+    BackgroundTransparency = 1,
+    PlaceholderText = "Buscar script...",
+    PlaceholderColor3 = Color3.fromRGB(120, 120, 120),
+    Text = "",
+    TextColor3 = Color3.new(1, 1, 1),
+    TextSize = 13,
+    Font = Enum.Font.GothamMedium,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ClearTextOnFocus = false,
+    ZIndex = 7,
+    Parent = searchFrame,
 })
 
 local list = new("ScrollingFrame", {
-    Position=UDim2.fromOffset(0,108),
-    Size=UDim2.new(1,0,1,-134),
-    BackgroundTransparency=1,
-    BorderSizePixel=0,
-    ScrollBarThickness=2,
-    ScrollBarImageColor3=Color3.fromRGB(210,210,210),
-    CanvasSize=UDim2.new(),
-    AutomaticCanvasSize=Enum.AutomaticSize.Y,
-    Parent=content
+    Position = UDim2.fromOffset(0, 108),
+    Size = UDim2.new(1, 0, 1, -136),
+    BackgroundTransparency = 1,
+    BorderSizePixel = 0,
+    ScrollBarThickness = 2,
+    ScrollBarImageColor3 = Color3.fromRGB(210, 210, 210),
+    CanvasSize = UDim2.new(),
+    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+    ScrollingDirection = Enum.ScrollingDirection.Y,
+    ZIndex = 6,
+    Parent = content,
 })
-new("UIListLayout", {Padding=UDim.new(0,9), SortOrder=Enum.SortOrder.LayoutOrder, Parent=list})
-new("UIPadding", {PaddingRight=UDim.new(0,3), PaddingBottom=UDim.new(0,4), Parent=list})
+
+local grid = new("UIGridLayout", {
+    CellPadding = UDim2.fromOffset(10, 10),
+    CellSize = UDim2.fromOffset(274, 306),
+    FillDirection = Enum.FillDirection.Horizontal,
+    FillDirectionMaxCells = 2,
+    HorizontalAlignment = Enum.HorizontalAlignment.Center,
+    SortOrder = Enum.SortOrder.LayoutOrder,
+    Parent = list,
+})
+
+new("UIPadding", {
+    PaddingBottom = UDim.new(0, 6),
+    Parent = list,
+})
 
 local status = new("TextLabel", {
-    AnchorPoint=Vector2.new(0,1),
-    Position=UDim2.new(0,0,1,0),
-    Size=UDim2.new(1,0,0,17),
-    BackgroundTransparency=1,
-    Text="Cargando scripts...",
-    TextColor3=Color3.fromRGB(120,120,120),
-    TextSize=9,
-    Font=Enum.Font.GothamMedium,
-    TextXAlignment=Enum.TextXAlignment.Left,
-    Parent=content
+    AnchorPoint = Vector2.new(0, 1),
+    Position = UDim2.new(0, 0, 1, 0),
+    Size = UDim2.new(1, 0, 0, 18),
+    BackgroundTransparency = 1,
+    Text = "Cargando scripts...",
+    TextColor3 = Color3.fromRGB(130, 130, 130),
+    TextSize = 9,
+    Font = Enum.Font.GothamMedium,
+    TextXAlignment = Enum.TextXAlignment.Left,
+    ZIndex = 7,
+    Parent = content,
 })
 
 local cards = {}
 
-local function runScript(data)
-    local src = game:HttpGet(data.URL, true)
-    local fn, err = loadstring(src)
-    if not fn then error(err) end
-    return fn()
-end
-
 local function createCard(data, index)
-    if data.Enabled == false then return end
+    if data.Enabled == false then
+        return
+    end
+
+    local description = clampDescription(
+        (data.Description and tostring(data.Description) ~= "" and data.Description)
+        or fallbackDescription(data)
+    )
 
     local card = new("Frame", {
-        Size=UDim2.new(1,-1,0,88),
-        BackgroundColor3=Color3.fromRGB(18,18,18),
-        BackgroundTransparency=.12,
-        BorderSizePixel=0,
-        LayoutOrder=index,
-        Parent=list
+        BackgroundColor3 = Color3.fromRGB(10, 10, 10),
+        BackgroundTransparency = 0.12,
+        BorderSizePixel = 0,
+        LayoutOrder = index,
+        ClipsDescendants = true,
+        ZIndex = 7,
+        Parent = list,
     })
-    round(card, 16)
-    stroke(card, .9)
+    round(card, 19)
+    stroke(card, 0.82)
 
-    local holder = new("Frame", {
-        Position=UDim2.fromOffset(8,8),
-        Size=UDim2.fromOffset(72,72),
-        BackgroundColor3=Color3.new(0,0,0),
-        BorderSizePixel=0,
-        ClipsDescendants=true,
-        Parent=card
+    -- 1) Imagen arriba.
+    local imageHolder = new("Frame", {
+        Position = UDim2.fromOffset(10, 10),
+        Size = UDim2.new(1, -20, 0, 154),
+        BackgroundColor3 = Color3.fromRGB(4, 4, 4),
+        BorderSizePixel = 0,
+        ClipsDescendants = true,
+        ZIndex = 8,
+        Parent = card,
     })
-    round(holder, 13)
+    round(imageHolder, 14)
 
     new("ImageLabel", {
-        Size=UDim2.fromScale(1,1),
-        BackgroundTransparency=1,
-        Image=tostring(data.Image or ""),
-        ScaleType=Enum.ScaleType.Crop,
-        Parent=holder
+        Size = UDim2.fromScale(1, 1),
+        BackgroundTransparency = 1,
+        Image = tostring(data.Image or ""),
+        ScaleType = Enum.ScaleType.Crop,
+        ZIndex = 9,
+        Parent = imageHolder,
     })
 
+    -- 2) Título en negrita.
     new("TextLabel", {
-        Position=UDim2.fromOffset(92,19),
-        Size=UDim2.new(1,-220,0,23),
-        BackgroundTransparency=1,
-        Text=tostring(data.Title or "Script"),
-        TextColor3=Color3.new(1,1,1),
-        TextSize=15,
-        Font=Enum.Font.GothamBold,
-        TextXAlignment=Enum.TextXAlignment.Left,
-        TextTruncate=Enum.TextTruncate.AtEnd,
-        Parent=card
+        Position = UDim2.fromOffset(14, 176),
+        Size = UDim2.new(1, -28, 0, 24),
+        BackgroundTransparency = 1,
+        Text = tostring(data.Title or "Script"),
+        TextColor3 = Color3.new(1, 1, 1),
+        TextSize = 16,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        ZIndex = 8,
+        Parent = card,
     })
 
+    -- 3) Descripción debajo del título (máximo 100 caracteres).
     new("TextLabel", {
-        Position=UDim2.fromOffset(92,43),
-        Size=UDim2.new(1,-220,0,18),
-        BackgroundTransparency=1,
-        Text="Disponible",
-        TextColor3=Color3.fromRGB(120,120,120),
-        TextSize=10,
-        Font=Enum.Font.GothamMedium,
-        TextXAlignment=Enum.TextXAlignment.Left,
-        Parent=card
+        Position = UDim2.fromOffset(14, 204),
+        Size = UDim2.new(1, -28, 0, 40),
+        BackgroundTransparency = 1,
+        Text = description,
+        TextColor3 = Color3.fromRGB(155, 155, 155),
+        TextSize = 11,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top,
+        TextWrapped = true,
+        ZIndex = 8,
+        Parent = card,
     })
 
     local button = new("TextButton", {
-        AnchorPoint=Vector2.new(1,.5),
-        Position=UDim2.new(1,-11,.5,0),
-        Size=UDim2.fromOffset(102,37),
-        BackgroundColor3=Color3.new(1,1,1),
-        BorderSizePixel=0,
-        Text="EJECUTAR",
-        TextColor3=Color3.new(0,0,0),
-        TextSize=10,
-        Font=Enum.Font.GothamBold,
-        AutoButtonColor=false,
-        Parent=card
+        AnchorPoint = Vector2.new(0.5, 1),
+        Position = UDim2.new(0.5, 0, 1, -12),
+        Size = UDim2.new(1, -28, 0, 39),
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        BorderSizePixel = 0,
+        Text = "EJECUTAR",
+        TextColor3 = Color3.new(0, 0, 0),
+        TextSize = 10,
+        Font = Enum.Font.GothamBold,
+        AutoButtonColor = false,
+        ZIndex = 8,
+        Parent = card,
     })
-    round(button, 11)
+    round(button, 12)
+
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.12), {BackgroundTransparency = 0.12}):Play()
+    end)
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.12), {BackgroundTransparency = 0}):Play()
+    end)
 
     button.MouseButton1Click:Connect(function()
-        button.Text="CARGANDO..."
-        status.Text="Cargando "..tostring(data.Title or "script").."..."
+        if closing then
+            return
+        end
+
+        button.Text = "CARGANDO..."
+        status.Text = "Preparando " .. tostring(data.Title or "script") .. "..."
 
         task.spawn(function()
-            local ok, err = pcall(function() runScript(data) end)
-            if ok then
-                button.Text="LISTO"
-                status.Text=tostring(data.Title or "Script").." ejecutado."
-            else
-                button.Text="ERROR"
-                status.Text="Error al ejecutar "..tostring(data.Title or "script")
-                warn("[H3X4 Loader] "..tostring(err))
+            -- Primero se descarga/compila. Si todo está bien, se cierra el loader y DESPUÉS se ejecuta.
+            local ok, result = pcall(function()
+                local src = game:HttpGet(data.URL, true)
+                local fn, err = loadstring(src)
+                if not fn then
+                    error(err)
+                end
+                return fn
+            end)
+
+            if not ok then
+                if button and button.Parent then
+                    button.Text = "ERROR"
+                end
+                status.Text = "Error al cargar " .. tostring(data.Title or "script")
+                warn("[H3X4 Loader] " .. tostring(result))
+                task.wait(1.1)
+                if button and button.Parent then
+                    button.Text = "EJECUTAR"
+                end
+                return
             end
-            task.wait(1.2)
-            if button and button.Parent then button.Text="EJECUTAR" end
+
+            local fn = result
+            closeLoader(function()
+                task.spawn(function()
+                    local ran, err = pcall(fn)
+                    if not ran then
+                        warn("[H3X4 Loader] Error al ejecutar: " .. tostring(err))
+                    end
+                end)
+            end)
         end)
     end)
 
-    table.insert(cards, {Frame=card, Title=tostring(data.Title or ""):lower()})
+    table.insert(cards, {
+        Frame = card,
+        Title = tostring(data.Title or ""):lower(),
+        Description = description:lower(),
+    })
 end
 
-search:GetPropertyChangedSignal("Text"):Connect(function()
+local function updateSearch()
     local q = search.Text:lower()
     local found = 0
-    for _,c in ipairs(cards) do
-        local visible = q == "" or string.find(c.Title, q, 1, true) ~= nil
+
+    for _, c in ipairs(cards) do
+        local visible = q == ""
+            or string.find(c.Title, q, 1, true) ~= nil
+            or string.find(c.Description, q, 1, true) ~= nil
+
         c.Frame.Visible = visible
-        if visible then found += 1 end
+        if visible then
+            found += 1
+        end
     end
-    status.Text = q == "" and (tostring(#cards).." scripts disponibles.") or (tostring(found).." resultados")
-end)
+
+    if q == "" then
+        status.Text = tostring(#cards) .. " scripts disponibles."
+    else
+        status.Text = tostring(found) .. " resultados"
+    end
+end
+
+search:GetPropertyChangedSignal("Text"):Connect(updateSearch)
 
 local function loadCatalog()
     local ok, result = pcall(function()
         local src = game:HttpGet(CATALOG_URL, true)
         local fn, err = loadstring(src)
-        if not fn then error(err) end
+        if not fn then
+            error(err)
+        end
+
         local catalog = fn()
-        if typeof(catalog) ~= "table" then error("loaders.lua debe devolver una tabla") end
+        if typeof(catalog) ~= "table" then
+            error("loaders.lua debe devolver una tabla")
+        end
         return catalog
     end)
 
     if not ok then
-        status.Text="Error al cargar loaders.lua"
-        warn("[H3X4 Loader] "..tostring(result))
+        status.Text = "Error al cargar loaders.lua"
+        countBadge.Text = "0 SCRIPTS"
+        warn("[H3X4 Loader] " .. tostring(result))
         return
     end
 
-    for i,data in ipairs(result) do
-        if typeof(data) == "table" then createCard(data, i) end
+    for i, data in ipairs(result) do
+        if typeof(data) == "table" then
+            createCard(data, i)
+        end
     end
-    status.Text=tostring(#cards).." scripts disponibles."
+
+    countBadge.Text = tostring(#cards) .. ((#cards == 1) and " SCRIPT" or " SCRIPTS")
+    status.Text = tostring(#cards) .. " scripts disponibles."
 end
 
-local dragging, dragInput, dragStart, startPos = false, nil, nil, nil
+local dragging = false
+local dragInput
+local dragStart
+local startPos
 
 header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging=true
-        dragStart=input.Position
-        startPos=main.Position
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = main.Position
+
         input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging=false end
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
         end)
     end
 end)
 
 header.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput=input
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
     end
 end)
 
 UIS.InputChanged:Connect(function(input)
     if dragging and input == dragInput then
-        local d=input.Position-dragStart
-        main.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
     end
 end)
 
-local cam=workspace.CurrentCamera
+local cam = workspace.CurrentCamera
 local function resize()
-    if not cam then return end
-    local v=cam.ViewportSize
-    main.Size=UDim2.fromOffset(math.clamp(v.X-30,335,540), math.clamp(v.Y-55,340,360))
+    if not cam then
+        return
+    end
+
+    local v = cam.ViewportSize
+    local width = math.clamp(v.X - 28, 335, 600)
+    local height = math.clamp(v.Y - 45, 420, 530)
+    main.Size = UDim2.fromOffset(width, height)
+
+    -- En pantallas pequeñas: una tarjeta por fila. En pantallas amplias: dos.
+    if width < 520 then
+        grid.FillDirectionMaxCells = 1
+        grid.CellSize = UDim2.new(1, -6, 0, 306)
+    else
+        grid.FillDirectionMaxCells = 2
+        grid.CellSize = UDim2.new(0.5, -7, 0, 306)
+    end
 end
+
 resize()
-if cam then cam:GetPropertyChangedSignal("ViewportSize"):Connect(resize) end
+if cam then
+    cam:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+end
 
 loadCatalog()
