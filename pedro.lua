@@ -84,16 +84,15 @@ local overlay = new("Frame", {
 local main = new("Frame", {
     AnchorPoint = Vector2.new(0.5, 0.5),
     Position = UDim2.fromScale(0.5, 0.5),
-    Size = UDim2.fromOffset(390, 330),
+    Size = UDim2.fromOffset(420, 330),
     BackgroundColor3 = Color3.new(0, 0, 0),
-    BackgroundTransparency = 0,
+    BackgroundTransparency = 1,
     BorderSizePixel = 0,
     ClipsDescendants = true,
     ZIndex = 2,
     Parent = gui,
 })
 round(main, 16)
-stroke(main, 0.82)
 
 local scale = new("UIScale", {
     Scale = 0.82,
@@ -109,6 +108,7 @@ local galaxy = new("Frame", {
     ZIndex = 2,
     Parent = main,
 })
+round(galaxy, 16)
 
 local function animateStar(star)
     if not star or not star.Parent or not gui.Parent then
@@ -599,7 +599,7 @@ local function resize()
     end
 
     local v = cam.ViewportSize
-    local width = math.clamp(v.X - 20, 280, 390)
+    local width = math.clamp(v.X - 20, 300, 420)
     local height = math.clamp(v.Y - 34, 300, 330)
     main.Size = UDim2.fromOffset(width, height)
 
