@@ -1588,20 +1588,64 @@ end
 
 search:GetPropertyChangedSignal("Text"):Connect(updateSearch)
 
-local function loadCatalog()
-    local ok, result = pcall(function()
-        local src = game:HttpGet(CATALOG_URL, true)
-        local fn, err = loadstring(src)
-        if not fn then
-            error(err)
-        end
+local function cleanCatalogSource(source)
+    source = tostring(source or "")
 
-        local catalog = fn()
-        if typeof(catalog) ~= "table" then
-            error(T("catalogTableError"))
+    -- Quita BOM UTF-8 si GitHub/editor lo añadió accidentalmente.
+    source = source:gsub("^\239\187\191", "")
+
+    -- Permite que loaders.lua se haya pegado accidentalmente dentro de un bloque Markdown.
+    source = source:gsub("^%s*```[%w_-]*%s*", "")
+    source = source:gsub("%s*```%s*$", "")
+
+    return source
+end
+
+local function fetchCatalog()
+    local urls = {
+        CATALOG_URL,
+        "https://raw.githubusercontent.com/NonyH/universalh3xa/main/loaders.lua",
+    }
+
+    local lastError = "Unknown catalog error"
+
+    for _, baseUrl in ipairs(urls) do
+        local requestUrl = baseUrl
+        local separator = string.find(baseUrl, "?", 1, true) and "&" or "?"
+        requestUrl = requestUrl .. separator .. "h3x4=" .. tostring(os.time())
+
+        local okHttp, source = pcall(function()
+            return game:HttpGet(requestUrl, true)
+        end)
+
+        if okHttp and type(source) == "string" and source ~= "" then
+            source = cleanCatalogSource(source)
+
+            local fn, compileError = loadstring(source, "H3X4_loaders.lua")
+            if fn then
+                local okRun, catalog = pcall(fn)
+                if okRun and typeof(catalog) == "table" then
+                    return catalog
+                elseif not okRun then
+                    lastError = "Error ejecutando loaders.lua: " .. tostring(catalog)
+                else
+                    lastError = T("catalogTableError")
+                end
+            else
+                lastError = "Error de sintaxis en loaders.lua: " .. tostring(compileError)
+            end
+        elseif not okHttp then
+            lastError = "Error HTTP: " .. tostring(source)
+        else
+            lastError = "loaders.lua está vacío"
         end
-        return catalog
-    end)
+    end
+
+    error(lastError)
+end
+
+local function loadCatalog()
+    local ok, result = pcall(fetchCatalog)
 
     if not ok then
         status.Text = T("catalogError")
@@ -1610,8 +1654,7 @@ local function loadCatalog()
         return
     end
 
-    -- Orden manual de recientes: se respeta exactamente el orden de loaders.lua.
-    -- Pon primero el script que quieras mostrar como más reciente.
+    -- Orden manual: se respeta exactamente el orden de loaders.lua.
     for i, data in ipairs(result) do
         if typeof(data) == "table" then
             createCard(data, i)
