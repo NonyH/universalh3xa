@@ -37,9 +37,9 @@ return {
         Version = "1.0",
 
         Tag = {
-            TitleES = "none",
-            TitleEN = "none",
-            Color = "#FFFFFF",
+            TitleES = "BETA",
+            TitleEN = "BETA",
+            Color = "#FF2B00",
         },
 
         Enabled = true,
