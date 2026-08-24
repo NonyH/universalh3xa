@@ -14,7 +14,8 @@ return {
         Version = "1.0",
 
         Tag = {
-            Title = "none",
+            TitleES = "none",
+            TitleEn= "none"
             Color = "#FFFFFF",
         },
 
@@ -36,7 +37,8 @@ return {
         Version = "1.0",
 
         Tag = {
-            Title = "NUEVO",
+            TitleES = "NUEVO",
+            TitleEn = "NEW"
             Color = "#FFFFFF",
         },
 
