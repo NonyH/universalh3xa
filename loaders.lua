@@ -9,13 +9,13 @@ return {
         Image = "rbxassetid://97057058128005",
         URL = "https://raw.githubusercontent.com/NonyH/universalh3xa/refs/heads/main/h3xaX",
 
-        Author = "Nony",
+        Author = "NONY",
         Game = "Universal / Semi-Universal",
         Version = "1.0",
 
         Tag = {
-            TitleES = "none",
-            TitleEn= "none"
+            TitleES = "NUEVO",
+            TitleEN = "NEW",
             Color = "#FFFFFF",
         },
 
@@ -32,13 +32,13 @@ return {
         Image = "rbxassetid://114285884839092",
         URL = "https://raw.githubusercontent.com/NonyH/universalh3xa/refs/heads/main/hboat.lua",
 
-        Author = "Nony",
+        Author = "NONY",
         Game = "Build A Boat For Treasure",
         Version = "1.0",
 
         Tag = {
-            TitleES = "NUEVO",
-            TitleEn = "NEW"
+            TitleES = "none",
+            TitleEN = "none",
             Color = "#FFFFFF",
         },
 
