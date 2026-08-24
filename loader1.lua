@@ -386,7 +386,22 @@ local function getTag(data)
         return nil
     end
 
-    local title = tostring(tag.Title or tag.Text or tag.Name or "")
+    -- La etiqueta puede tener texto distinto para Español e Inglés.
+    -- Ejemplo:
+    -- Tag = { TitleES = "NUEVO", TitleEN = "NEW", Color = "#FFFFFF" }
+    local title
+    if currentLanguage == "en" then
+        title = tag.TitleEN or tag.TitleEn or tag.TitleEnglish
+    else
+        title = tag.TitleES or tag.TitleEs or tag.TitleSpanish
+    end
+
+    -- Compatibilidad con el formato anterior: Title/Text/Name.
+    if title == nil or tostring(title) == "" then
+        title = tag.Title or tag.Text or tag.Name
+    end
+
+    title = tostring(title or "")
     if title == "" or string.lower(title) == "none" then
         return nil
     end
@@ -967,10 +982,11 @@ local noResults = new("TextLabel", {
 })
 
 -- Panel modal de detalles del script.
+-- Conserva el mismo lenguaje visual de las tarjetas normales, pero ampliado.
 local detailsShade = new("Frame", {
     Size = UDim2.fromScale(1, 1),
     BackgroundColor3 = Color3.new(0, 0, 0),
-    BackgroundTransparency = 0.22,
+    BackgroundTransparency = 0.18,
     BorderSizePixel = 0,
     Visible = false,
     Active = true,
@@ -982,24 +998,25 @@ round(detailsShade, 16)
 local detailsPanel = new("Frame", {
     AnchorPoint = Vector2.new(0.5, 0.5),
     Position = UDim2.fromScale(0.5, 0.5),
-    Size = UDim2.new(0.86, 0, 0.84, 0),
-    BackgroundColor3 = Color3.fromRGB(8, 8, 8),
-    BackgroundTransparency = 0.02,
+    Size = UDim2.new(0.92, 0, 0.91, 0),
+    BackgroundColor3 = Color3.fromRGB(10, 10, 10),
+    BackgroundTransparency = 0.04,
     BorderSizePixel = 0,
+    ClipsDescendants = true,
     ZIndex = 31,
     Parent = detailsShade,
 })
 round(detailsPanel, 14)
-local detailsPanelStroke = stroke(detailsPanel, 0.22)
-detailsPanelStroke.Thickness = 1.5
+local detailsPanelStroke = stroke(detailsPanel, 0.18)
+detailsPanelStroke.Thickness = 1.45
 
 local detailsHeader = new("TextLabel", {
     Position = UDim2.fromOffset(14, 10),
-    Size = UDim2.new(1, -55, 0, 22),
+    Size = UDim2.new(1, -58, 0, 22),
     BackgroundTransparency = 1,
     Text = T("detailsTitle"),
-    TextColor3 = Color3.new(1, 1, 1),
-    TextSize = 13,
+    TextColor3 = Color3.fromRGB(190, 190, 190),
+    TextSize = 10,
     Font = Enum.Font.GothamBold,
     TextXAlignment = Enum.TextXAlignment.Left,
     ZIndex = 32,
@@ -1008,49 +1025,69 @@ local detailsHeader = new("TextLabel", {
 
 local detailsClose = new("TextButton", {
     AnchorPoint = Vector2.new(1, 0),
-    Position = UDim2.new(1, -10, 0, 8),
-    Size = UDim2.fromOffset(28, 28),
-    BackgroundColor3 = Color3.new(1, 1, 1),
-    BackgroundTransparency = 0.9,
+    Position = UDim2.new(1, -10, 0, 7),
+    Size = UDim2.fromOffset(29, 29),
+    BackgroundColor3 = Color3.fromRGB(24, 24, 24),
+    BackgroundTransparency = 0.08,
     BorderSizePixel = 0,
     Text = "×",
     TextColor3 = Color3.new(1, 1, 1),
-    TextSize = 17,
+    TextSize = 18,
     Font = Enum.Font.GothamBold,
     AutoButtonColor = false,
-    ZIndex = 33,
+    ZIndex = 36,
     Parent = detailsPanel,
 })
 round(detailsClose, 9)
+stroke(detailsClose, 0.68)
 
+-- Imagen grande, igual que una tarjeta normal pero ocupando casi todo el ancho.
 local detailsImageHolder = new("Frame", {
-    Position = UDim2.fromOffset(14, 42),
-    Size = UDim2.new(0.34, 0, 0, 100),
+    Position = UDim2.fromOffset(14, 40),
+    Size = UDim2.new(1, -28, 0, 132),
     BackgroundColor3 = Color3.fromRGB(4, 4, 4),
     BorderSizePixel = 0,
     ClipsDescendants = true,
     ZIndex = 32,
     Parent = detailsPanel,
 })
-round(detailsImageHolder, 10)
-stroke(detailsImageHolder, 0.75)
+round(detailsImageHolder, 11)
+local detailsImageStroke = stroke(detailsImageHolder, 0.72)
+detailsImageStroke.Thickness = 1.1
 
 local detailsImage = new("ImageLabel", {
     Size = UDim2.fromScale(1, 1),
     BackgroundTransparency = 1,
     Image = "",
-    ScaleType = Enum.ScaleType.Fit,
+    ScaleType = Enum.ScaleType.Crop,
     ZIndex = 33,
     Parent = detailsImageHolder,
 })
 
+-- La etiqueta queda encima de la imagen, igual que en las tarjetas del listado.
+local detailsTag = new("TextLabel", {
+    Position = UDim2.fromOffset(10, 10),
+    Size = UDim2.fromOffset(90, 22),
+    BackgroundColor3 = Color3.new(1, 1, 1),
+    BackgroundTransparency = 0.03,
+    BorderSizePixel = 0,
+    Text = "",
+    TextColor3 = Color3.new(0, 0, 0),
+    TextSize = 9,
+    Font = Enum.Font.GothamBold,
+    Visible = false,
+    ZIndex = 35,
+    Parent = detailsImageHolder,
+})
+round(detailsTag, 7)
+
 local detailsName = new("TextLabel", {
-    Position = UDim2.new(0.37, 6, 0, 44),
-    Size = UDim2.new(0.63, -20, 0, 24),
+    Position = UDim2.fromOffset(15, 181),
+    Size = UDim2.new(1, -30, 0, 26),
     BackgroundTransparency = 1,
     Text = "Script",
     TextColor3 = Color3.new(1, 1, 1),
-    TextSize = 16,
+    TextSize = 18,
     Font = Enum.Font.GothamBold,
     TextXAlignment = Enum.TextXAlignment.Left,
     TextTruncate = Enum.TextTruncate.AtEnd,
@@ -1058,25 +1095,24 @@ local detailsName = new("TextLabel", {
     Parent = detailsPanel,
 })
 
-local detailsTag = new("TextLabel", {
-    Position = UDim2.new(0.37, 6, 0, 74),
-    Size = UDim2.fromOffset(90, 22),
-    BackgroundColor3 = Color3.new(1, 1, 1),
-    BackgroundTransparency = 0.05,
+-- Contenedor de información completa con el mismo borde sutil de las tarjetas.
+local detailsInfoCard = new("Frame", {
+    Position = UDim2.fromOffset(14, 214),
+    Size = UDim2.new(1, -28, 1, -228),
+    BackgroundColor3 = Color3.fromRGB(5, 5, 5),
+    BackgroundTransparency = 0.18,
     BorderSizePixel = 0,
-    Text = "",
-    TextColor3 = Color3.new(0, 0, 0),
-    TextSize = 9,
-    Font = Enum.Font.GothamBold,
-    Visible = false,
+    ClipsDescendants = true,
     ZIndex = 32,
     Parent = detailsPanel,
 })
-round(detailsTag, 7)
+round(detailsInfoCard, 10)
+local detailsInfoStroke = stroke(detailsInfoCard, 0.78)
+detailsInfoStroke.Thickness = 1
 
 local detailsScroll = new("ScrollingFrame", {
-    Position = UDim2.fromOffset(14, 152),
-    Size = UDim2.new(1, -28, 1, -166),
+    Position = UDim2.fromOffset(10, 9),
+    Size = UDim2.new(1, -20, 1, -18),
     BackgroundTransparency = 1,
     BorderSizePixel = 0,
     ScrollBarThickness = 2,
@@ -1084,23 +1120,23 @@ local detailsScroll = new("ScrollingFrame", {
     CanvasSize = UDim2.new(),
     AutomaticCanvasSize = Enum.AutomaticSize.Y,
     ScrollingDirection = Enum.ScrollingDirection.Y,
-    ZIndex = 32,
-    Parent = detailsPanel,
+    ZIndex = 33,
+    Parent = detailsInfoCard,
 })
 
 local detailsText = new("TextLabel", {
-    Size = UDim2.new(1, -6, 0, 0),
+    Size = UDim2.new(1, -8, 0, 0),
     AutomaticSize = Enum.AutomaticSize.Y,
     BackgroundTransparency = 1,
     Text = "",
-    TextColor3 = Color3.fromRGB(205, 205, 205),
-    TextSize = 12,
+    TextColor3 = Color3.fromRGB(220, 220, 220),
+    TextSize = 13,
     Font = Enum.Font.GothamMedium,
     TextXAlignment = Enum.TextXAlignment.Left,
     TextYAlignment = Enum.TextYAlignment.Top,
     TextWrapped = true,
     RichText = false,
-    ZIndex = 33,
+    ZIndex = 34,
     Parent = detailsScroll,
 })
 
@@ -1126,12 +1162,10 @@ local function buildDetailsText(data)
         table.insert(lines, "")
     end
 
-    local tag = getTag(data)
     local standard = {
         {T("version"), data.Version},
         {T("author"), data.Author or data.Creator},
         {T("game"), data.Game or data.GameName},
-        {T("tag"), tag and tag.Title or nil},
     }
 
     for _, item in ipairs(standard) do
@@ -1142,6 +1176,7 @@ local function buildDetailsText(data)
     end
 
     -- Cualquier campo simple adicional del RAW también aparece en Detalles.
+    -- URL/RAW y Enabled/Disponible permanecen ocultos en este panel.
     local ignored = {
         Title=true, TitleES=true, TitleEs=true, TitleEN=true, TitleEn=true,
         TitleSpanish=true, TitleEnglish=true,
@@ -1178,9 +1213,12 @@ local function refreshDetails()
     detailsName.Text = localizedTitle(data)
     detailsImage.Image = tostring(data.Image or "")
     detailsText.Text = buildDetailsText(data)
+    detailsScroll.CanvasPosition = Vector2.new(0, 0)
 
     local tag = getTag(data)
     if tag then
+        local tagWidth = math.clamp(30 + (#tag.Title * 6), 64, 150)
+        detailsTag.Size = UDim2.fromOffset(tagWidth, 22)
         detailsTag.Visible = true
         detailsTag.Text = tag.Title
         detailsTag.BackgroundColor3 = tag.Color
@@ -1381,8 +1419,8 @@ local function createCard(data, index)
         BackgroundTransparency = 0.03,
         BorderSizePixel = 0,
         Text = T("details"),
-        TextColor3 = Color3.new(1, 1, 1),
-        TextSize = mobileCard and 6 or 8,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = mobileCard and 7 or 9,
         Font = Enum.Font.GothamBold,
         AutoButtonColor = false,
         ZIndex = 8,
@@ -1401,8 +1439,8 @@ local function createCard(data, index)
         BackgroundTransparency = 0.04,
         BorderSizePixel = 0,
         Text = T("copyLoadstring"),
-        TextColor3 = Color3.new(1, 1, 1),
-        TextSize = mobileCard and 6 or 7,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = mobileCard and 7 or 8,
         Font = Enum.Font.GothamBold,
         AutoButtonColor = false,
         ZIndex = 8,
@@ -1613,6 +1651,23 @@ local function refreshCardsLanguage()
             end
             local tag = getTag(c.Data)
             c.Tag = tag and tag.Title:lower() or ""
+
+            if c.TagLabel and c.TagLabel.Parent then
+                if tag then
+                    local tagWidth = math.clamp(26 + (#tag.Title * 6), 58, 118)
+                    c.TagLabel.Size = UDim2.fromOffset(tagWidth, 20)
+                    c.TagLabel.Visible = true
+                    c.TagLabel.Text = tag.Title
+                    c.TagLabel.BackgroundColor3 = tag.Color
+                    local luminance = (tag.Color.R * 0.299) + (tag.Color.G * 0.587) + (tag.Color.B * 0.114)
+                    c.TagLabel.TextColor3 = luminance > 0.62 and Color3.new(0, 0, 0) or Color3.new(1, 1, 1)
+                else
+                    c.TagLabel.Visible = false
+                end
+            elseif tag and c.Frame and c.Frame.Parent then
+                -- Las tarjetas que originalmente no tenían etiqueta no crean una nueva aquí;
+                -- basta con definir TitleES/TitleEN desde el inicio del catálogo.
+            end
         end
     end
 end
