@@ -991,14 +991,13 @@ local detailsShade = new("Frame", {
     Visible = false,
     Active = true,
     ZIndex = 30,
-    Parent = main,
+    Parent = gui,
 })
-round(detailsShade, 16)
 
 local detailsPanel = new("Frame", {
     AnchorPoint = Vector2.new(0.5, 0.5),
     Position = UDim2.fromScale(0.5, 0.5),
-    Size = UDim2.new(0.92, 0, 0.91, 0),
+    Size = UDim2.fromOffset(560, 620),
     BackgroundColor3 = Color3.fromRGB(10, 10, 10),
     BackgroundTransparency = 0.04,
     BorderSizePixel = 0,
@@ -1120,6 +1119,9 @@ local detailsScroll = new("ScrollingFrame", {
     CanvasSize = UDim2.new(),
     AutomaticCanvasSize = Enum.AutomaticSize.Y,
     ScrollingDirection = Enum.ScrollingDirection.Y,
+    ScrollingEnabled = true,
+    ElasticBehavior = Enum.ElasticBehavior.WhenScrollable,
+    VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar,
     ZIndex = 33,
     Parent = detailsInfoCard,
 })
@@ -1139,6 +1141,49 @@ local detailsText = new("TextLabel", {
     ZIndex = 34,
     Parent = detailsScroll,
 })
+
+-- El panel de detalles usa el tamaño real de la pantalla, no el tamaño reducido del loader.
+-- Esto evita que en celular el área de información quede con apenas unos píxeles de alto.
+local function resizeDetailsPanel()
+    local currentCam = workspace.CurrentCamera
+    if not currentCam then return end
+
+    local viewport = currentCam.ViewportSize
+    local mobile = UIS.TouchEnabled and not (UIS.KeyboardEnabled and UIS.MouseEnabled)
+
+    local panelWidth
+    local panelHeight
+    local imageHeight
+
+    if mobile then
+        panelWidth = math.clamp(viewport.X - 20, 300, 430)
+        panelHeight = math.clamp(viewport.Y - 34, 470, 720)
+        imageHeight = math.clamp(math.floor(panelWidth * 0.46), 145, 190)
+    else
+        panelWidth = math.min(math.clamp(viewport.X * 0.52, 520, 680), viewport.X - 50)
+        panelHeight = math.min(math.clamp(viewport.Y * 0.76, 520, 700), viewport.Y - 50)
+        imageHeight = math.clamp(math.floor(panelWidth * 0.34), 165, 220)
+    end
+
+    detailsPanel.Size = UDim2.fromOffset(panelWidth, panelHeight)
+
+    detailsHeader.Position = UDim2.fromOffset(14, 10)
+    detailsHeader.Size = UDim2.new(1, -58, 0, 22)
+
+    detailsImageHolder.Position = UDim2.fromOffset(14, 40)
+    detailsImageHolder.Size = UDim2.new(1, -28, 0, imageHeight)
+
+    local titleY = 40 + imageHeight + 9
+    detailsName.Position = UDim2.fromOffset(15, titleY)
+    detailsName.Size = UDim2.new(1, -30, 0, mobile and 29 or 32)
+    detailsName.TextSize = mobile and 18 or 21
+
+    local infoY = titleY + (mobile and 36 or 40)
+    detailsInfoCard.Position = UDim2.fromOffset(14, infoY)
+    detailsInfoCard.Size = UDim2.new(1, -28, 1, -(infoY + 14))
+
+    detailsText.TextSize = mobile and 13 or 14
+end
 
 local currentDetailsData = nil
 
@@ -1231,6 +1276,7 @@ end
 
 local function openDetails(data)
     currentDetailsData = data
+    resizeDetailsPanel()
     refreshDetails()
     detailsShade.Visible = true
 end
@@ -1419,7 +1465,8 @@ local function createCard(data, index)
         BackgroundTransparency = 0.03,
         BorderSizePixel = 0,
         Text = T("details"),
-        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextColor3 = Color3.new(1, 1, 1),
+        TextStrokeTransparency = 1,
         TextSize = mobileCard and 7 or 9,
         Font = Enum.Font.GothamBold,
         AutoButtonColor = false,
@@ -1427,9 +1474,6 @@ local function createCard(data, index)
         Parent = card,
     })
     round(detailsButton, 8)
-    local detailsGoldStroke = stroke(detailsButton, 0.32)
-    detailsGoldStroke.Color = Color3.fromRGB(208, 165, 58)
-    detailsGoldStroke.Thickness = 1.15
 
     local copyButton = new("TextButton", {
         AnchorPoint = Vector2.new(1, 1),
@@ -1439,7 +1483,8 @@ local function createCard(data, index)
         BackgroundTransparency = 0.04,
         BorderSizePixel = 0,
         Text = T("copyLoadstring"),
-        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextColor3 = Color3.new(1, 1, 1),
+        TextStrokeTransparency = 1,
         TextSize = mobileCard and 7 or 8,
         Font = Enum.Font.GothamBold,
         AutoButtonColor = false,
@@ -1447,9 +1492,6 @@ local function createCard(data, index)
         Parent = card,
     })
     round(copyButton, 8)
-    local copyGoldStroke = stroke(copyButton, 0.34)
-    copyGoldStroke.Color = Color3.fromRGB(194, 148, 46)
-    copyGoldStroke.Thickness = 1.15
 
     favoriteButton.MouseButton1Click:Connect(function()
         local newValue = not isFavorite(data)
@@ -1864,13 +1906,18 @@ end
 resize()
 if cam then
     cam:GetPropertyChangedSignal("ViewportSize"):Connect(resize)
+    cam:GetPropertyChangedSignal("ViewportSize"):Connect(resizeDetailsPanel)
 end
+resizeDetailsPanel()
 
 -- Si cambian las capacidades de entrada (por ejemplo, teclado/ratón conectado),
 -- vuelve a calcular automáticamente el tamaño del panel.
 UIS:GetPropertyChangedSignal("TouchEnabled"):Connect(resize)
 UIS:GetPropertyChangedSignal("KeyboardEnabled"):Connect(resize)
 UIS:GetPropertyChangedSignal("MouseEnabled"):Connect(resize)
+UIS:GetPropertyChangedSignal("TouchEnabled"):Connect(resizeDetailsPanel)
+UIS:GetPropertyChangedSignal("KeyboardEnabled"):Connect(resizeDetailsPanel)
+UIS:GetPropertyChangedSignal("MouseEnabled"):Connect(resizeDetailsPanel)
 
 if rememberedLanguage ~= nil then
     openMainLoader()
