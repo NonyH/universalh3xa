@@ -1132,8 +1132,6 @@ local function buildDetailsText(data)
         {T("author"), data.Author or data.Creator},
         {T("game"), data.Game or data.GameName},
         {T("tag"), tag and tag.Title or nil},
-        {T("enabled"), data.Enabled ~= false},
-        {T("raw"), data.URL},
     }
 
     for _, item in ipairs(standard) do
@@ -1379,8 +1377,8 @@ local function createCard(data, index)
         AnchorPoint = Vector2.new(0.5, 1),
         Position = UDim2.new(0.5, 0, 1, -7),
         Size = UDim2.new(0.32, -8, 0, 25),
-        BackgroundColor3 = Color3.fromRGB(30, 30, 30),
-        BackgroundTransparency = 0.02,
+        BackgroundColor3 = Color3.fromRGB(126, 96, 28),
+        BackgroundTransparency = 0.03,
         BorderSizePixel = 0,
         Text = T("details"),
         TextColor3 = Color3.new(1, 1, 1),
@@ -1391,14 +1389,16 @@ local function createCard(data, index)
         Parent = card,
     })
     round(detailsButton, 8)
-    stroke(detailsButton, 0.58).Thickness = 1
+    local detailsGoldStroke = stroke(detailsButton, 0.32)
+    detailsGoldStroke.Color = Color3.fromRGB(208, 165, 58)
+    detailsGoldStroke.Thickness = 1.15
 
     local copyButton = new("TextButton", {
         AnchorPoint = Vector2.new(1, 1),
         Position = UDim2.new(1, -9, 1, -7),
         Size = UDim2.new(0.34, -10, 0, 25),
-        BackgroundColor3 = Color3.fromRGB(22, 22, 22),
-        BackgroundTransparency = 0.05,
+        BackgroundColor3 = Color3.fromRGB(108, 80, 22),
+        BackgroundTransparency = 0.04,
         BorderSizePixel = 0,
         Text = T("copyLoadstring"),
         TextColor3 = Color3.new(1, 1, 1),
@@ -1409,7 +1409,9 @@ local function createCard(data, index)
         Parent = card,
     })
     round(copyButton, 8)
-    stroke(copyButton, 0.58).Thickness = 1
+    local copyGoldStroke = stroke(copyButton, 0.34)
+    copyGoldStroke.Color = Color3.fromRGB(194, 148, 46)
+    copyGoldStroke.Thickness = 1.15
 
     favoriteButton.MouseButton1Click:Connect(function()
         local newValue = not isFavorite(data)
@@ -1432,13 +1434,13 @@ local function createCard(data, index)
         TweenService:Create(detailsButton, TweenInfo.new(0.12), {BackgroundTransparency = 0}):Play()
     end)
     detailsButton.MouseLeave:Connect(function()
-        TweenService:Create(detailsButton, TweenInfo.new(0.12), {BackgroundTransparency = 0.02}):Play()
+        TweenService:Create(detailsButton, TweenInfo.new(0.12), {BackgroundTransparency = 0.03}):Play()
     end)
     copyButton.MouseEnter:Connect(function()
         TweenService:Create(copyButton, TweenInfo.new(0.12), {BackgroundTransparency = 0}):Play()
     end)
     copyButton.MouseLeave:Connect(function()
-        TweenService:Create(copyButton, TweenInfo.new(0.12), {BackgroundTransparency = 0.05}):Play()
+        TweenService:Create(copyButton, TweenInfo.new(0.12), {BackgroundTransparency = 0.04}):Play()
     end)
 
     copyButton.MouseButton1Click:Connect(function()
