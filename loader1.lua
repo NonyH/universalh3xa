@@ -1156,11 +1156,11 @@ local function resizeDetailsPanel()
     local imageHeight
 
     if mobile then
-        -- Celular: panel compacto y centrado. La información completa se conserva
-        -- dentro del área desplazable inferior para evitar que el modal ocupe toda la pantalla.
-        panelWidth = math.min(math.clamp(viewport.X * 0.80, 270, 330), viewport.X - 46)
-        panelHeight = math.min(math.clamp(viewport.Y * 0.60, 340, 450), viewport.Y - 72)
-        imageHeight = math.clamp(math.floor(panelWidth * 0.32), 88, 108)
+        -- Celular: modal realmente pequeño. Bajamos tanto los porcentajes como los mínimos,
+        -- y dejamos toda la información completa dentro del scroll interno.
+        panelWidth = math.min(math.clamp(viewport.X * 0.58, 205, 270), viewport.X - 90)
+        panelHeight = math.min(math.clamp(viewport.Y * 0.45, 245, 330), viewport.Y - 150)
+        imageHeight = math.clamp(math.floor(panelWidth * 0.27), 56, 74)
     else
         panelWidth = math.min(math.clamp(viewport.X * 0.52, 520, 680), viewport.X - 50)
         panelHeight = math.min(math.clamp(viewport.Y * 0.76, 520, 700), viewport.Y - 50)
@@ -1169,32 +1169,32 @@ local function resizeDetailsPanel()
 
     detailsPanel.Size = UDim2.fromOffset(panelWidth, panelHeight)
 
-    local sidePad = mobile and 11 or 14
-    local topImageY = mobile and 36 or 40
+    local sidePad = mobile and 8 or 14
+    local topImageY = mobile and 31 or 40
 
-    detailsHeader.Position = UDim2.fromOffset(sidePad, mobile and 8 or 10)
-    detailsHeader.Size = UDim2.new(1, -(sidePad + 44), 0, mobile and 19 or 22)
-    detailsHeader.TextSize = mobile and 9 or 10
+    detailsHeader.Position = UDim2.fromOffset(sidePad, mobile and 6 or 10)
+    detailsHeader.Size = UDim2.new(1, -(sidePad + 38), 0, mobile and 17 or 22)
+    detailsHeader.TextSize = mobile and 8 or 10
 
-    detailsClose.Position = UDim2.new(1, -(mobile and 7 or 10), 0, mobile and 6 or 7)
-    detailsClose.Size = UDim2.fromOffset(mobile and 26 or 29, mobile and 26 or 29)
-    detailsClose.TextSize = mobile and 16 or 18
+    detailsClose.Position = UDim2.new(1, -(mobile and 6 or 10), 0, mobile and 5 or 7)
+    detailsClose.Size = UDim2.fromOffset(mobile and 22 or 29, mobile and 22 or 29)
+    detailsClose.TextSize = mobile and 14 or 18
 
     detailsImageHolder.Position = UDim2.fromOffset(sidePad, topImageY)
     detailsImageHolder.Size = UDim2.new(1, -(sidePad * 2), 0, imageHeight)
 
-    local titleY = topImageY + imageHeight + (mobile and 7 or 9)
+    local titleY = topImageY + imageHeight + (mobile and 5 or 9)
     detailsName.Position = UDim2.fromOffset(sidePad + 1, titleY)
-    detailsName.Size = UDim2.new(1, -((sidePad + 1) * 2), 0, mobile and 24 or 32)
-    detailsName.TextSize = mobile and 16 or 21
+    detailsName.Size = UDim2.new(1, -((sidePad + 1) * 2), 0, mobile and 20 or 32)
+    detailsName.TextSize = mobile and 13 or 21
 
-    local infoY = titleY + (mobile and 29 or 40)
+    local infoY = titleY + (mobile and 23 or 40)
     detailsInfoCard.Position = UDim2.fromOffset(sidePad, infoY)
     detailsInfoCard.Size = UDim2.new(1, -(sidePad * 2), 1, -(infoY + sidePad))
 
-    detailsScroll.Position = UDim2.fromOffset(mobile and 8 or 10, mobile and 7 or 9)
-    detailsScroll.Size = UDim2.new(1, -(mobile and 16 or 20), 1, -(mobile and 14 or 18))
-    detailsText.TextSize = mobile and 12 or 14
+    detailsScroll.Position = UDim2.fromOffset(mobile and 6 or 10, mobile and 5 or 9)
+    detailsScroll.Size = UDim2.new(1, -(mobile and 12 or 20), 1, -(mobile and 10 or 18))
+    detailsText.TextSize = mobile and 10 or 14
 end
 
 local currentDetailsData = nil
