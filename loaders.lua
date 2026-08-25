@@ -44,4 +44,26 @@ return {
 
         Enabled = true,
     },
+
+    {
+        Title = "HX EMOTES",
+
+        DescriptionES = "Emotes y animaciones universales, totalmente visuales no solo local.",
+        DescriptionEN = "Universal emotes and animations—fully visual, not just local.",
+
+        Image = "rbxassetid://107602712953732",
+        URL = "https://raw.githubusercontent.com/NonyH/universalh3xa/refs/heads/main/hxemotes.lua",
+
+        Author = "NONY",
+        Game = "Universal",
+        Version = "1.0",
+
+        Tag = {
+            TitleES = "NUEVO",
+            TitleEN = "NEW",
+            Color = "#FFFFFF",
+        },
+
+        Enabled = true,
+    },
 }
