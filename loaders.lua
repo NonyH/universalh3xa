@@ -14,8 +14,8 @@ return {
         Version = "1.0",
 
         Tag = {
-            TitleES = "NUEVO",
-            TitleEN = "NEW",
+            TitleES = "none",
+            TitleEN = "none",
             Color = "#FFFFFF",
         },
 
@@ -59,9 +59,9 @@ return {
         Version = "1.0",
 
         Tag = {
-            TitleES = "NUEVO",
-            TitleEN = "NEW",
-            Color = "#FFFFFF",
+            TitleES = "BETA",
+            TitleEN = "BETA",
+            Color = "##FF2B00",
         },
 
         Enabled = true,
