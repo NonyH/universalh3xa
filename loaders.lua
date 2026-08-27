@@ -1,6 +1,6 @@
 return {
     {
-        Title = "H3X4 X",
+        Title = "H3X4 X Universal aimbot +",
 
         DescriptionES = "Hexa X es un script semiuniversal para Roblox que reúne funciones de combate, movimiento, visualización y personalización en una interfaz moderna, sencilla y compatible con PC y dispositivos móviles. Incluye herramientas como Aimbot, ESP, Trigger Bot, X-Ray, Fullbright, ajustes de movimiento y otras opciones configurables.",
 
@@ -14,8 +14,8 @@ return {
         Version = "1.0",
 
         Tag = {
-            TitleES = "none",
-            TitleEN = "none",
+            TitleES = "PRINCIPAL",
+            TitleEN = "MAIN",
             Color = "#FFFFFF",
         },
 
