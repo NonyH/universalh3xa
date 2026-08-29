@@ -59,8 +59,8 @@ return {
         Version = "1.0",
 
         Tag = {
-            TitleES = "CORRIGIENDO",
-            TitleEN = "CORRECTING",
+            TitleES = "BETA",
+            TitleEN = "BETA",
             Color = "#FF0000",
         },
 
