@@ -56,12 +56,12 @@ return {
 
         Author = "NONY",
         Game = "Universal",
-        Version = "1.0",
+        Version = "1.1",
 
         Tag = {
-            TitleES = "BETA",
-            TitleEN = "BETA",
-            Color = "#FF0000",
+            TitleES = "ACTUALIZADO",
+            TitleEN = "UPDATED",
+            Color = "#FFFFFF",
         },
 
         Enabled = true,
