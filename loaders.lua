@@ -66,4 +66,27 @@ return {
 
         Enabled = true,
     },
+
+    {
+        Title = "HX Monkey Scape",
+
+        DescriptionES = "Script completo para +1 Speed Monkey Escape con Auto Farm, progresión automática, teleports, protecciones, mejoras de movimiento y utilidades para avanzar más rápido y cómodo.",
+
+        DescriptionEN = "Complete script for +1 Speed Monkey Escape featuring Auto Farm, automatic progression, teleports, protections, movement upgrades, and utilities to progress faster and more comfortably.",
+
+        Image = "rbxassetid://100198754783266",
+        URL = "https://raw.githubusercontent.com/NonyH/universalh3xa/refs/heads/main/speedmonkeyscape",
+
+        Author = "NONY",
+        Game = "+1 Speed Monkey Escape",
+        Version = "1.0",
+
+        Tag = {
+            TitleES = "BETA VIP",
+            TitleEN = "BETA VIP",
+            Color = "#FF2B00",
+        },
+
+        Enabled = true,
+    },
 }
