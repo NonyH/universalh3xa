@@ -82,9 +82,9 @@ return {
         Version = "1.0",
 
         Tag = {
-            TitleES = "BETA VIP",
-            TitleEN = "BETA VIP",
-            Color = "#FF2B00",
+            TitleES = "NUEVO (BETA)",
+            TitleEN = "NUEVO (BETA)",
+            Color = "#000000",
         },
 
         Enabled = true,
